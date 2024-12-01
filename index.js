@@ -9,6 +9,7 @@ const dbHost = process.env.DB_HOST;
 const dbUser = process.env.DB_USER;
 const dbPass = process.env.DB_PASSWORD;
 const dbName = process.env.DB_NAME;
+const domain = process.env.DOMAIN;
 
 const bot = new Telegraf(botToken)
 const app = express()
@@ -1532,7 +1533,17 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
     }
 });
 
-bot.launch()
+bot.launch(
+    {
+        webhook: {
+            // Public domain for webhook; e.g.: example.com
+            domain: domain,
+        
+            // Port to listen on; e.g.: 8080
+            port: port,
+        },
+    }
+)
 
 // Graceful shutdown
 process.once('SIGINT', () => bot.stop('SIGINT'));
