@@ -4,6 +4,11 @@ require('dotenv').config();
 
 // Access the token using process.env
 const botToken = process.env.BOT_TOKEN;
+const port = process.env.PORT;
+const dbHost = process.env.DB_HOST;
+const dbUser = process.env.DB_USER;
+const dbPass = process.env.DB_PASSWORD;
+const dbName = process.env.DB_NAME;
 
 const bot = new Telegraf(botToken)
 const app = express()
@@ -13,10 +18,10 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 
 const conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "bot_puntenpaket",
+    host: dbHost,
+    user: dbUser,
+    password: dbPass,
+    database: dbName,
     timezone: 'Z' // Set 'Z' for UTC or '+07:00' for specific time zones
 })
 
