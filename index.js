@@ -64,7 +64,7 @@ function DBConn(){
         // const dateString = dataStoreTanggal[0].tanggal.toISOString().split('T')[0]
         if (result.length > 0) {
             // Data already exists
-            conn.query('DELETE FROM tbJadwal WHERE tanggal < DATE(NOW())',
+            conn.query('DELETE FROM tbjadwal WHERE tanggal < DATE(NOW())',
                 (err) => {
                     if (err) {
                         console.error(err);
@@ -105,7 +105,7 @@ function kodeRandom(length) {
 function checkUser() {
     return (ctx, next) => {
         const idChat = ctx.from.id;
-        const checkUserQuery = 'SELECT * FROM tbUser WHERE id_chat = ?';
+        const checkUserQuery = 'SELECT * FROM tbuser WHERE id_chat = ?';
 
         conn.query(checkUserQuery, [idChat], (err, results) => {
             if (err) {
@@ -125,7 +125,7 @@ function checkUser() {
 function checkPaket() {
     return (ctx, next) => {
         const idChat = ctx.from.id;
-        const checkUserQuery = 'SELECT * FROM tbPaket WHERE id_pemilik = ?';
+        const checkUserQuery = 'SELECT * FROM tbpaket WHERE id_pemilik = ?';
 
         conn.query(checkUserQuery, [idChat], (err, results) => {
             if (err) {
@@ -145,7 +145,7 @@ function checkPaket() {
 function checkAntrian() {
     return (ctx, next) => {
         const idChat = ctx.from.id;
-        const checkUserQuery = 'SELECT * FROM tbAntrian WHERE id_pemilik = ?';
+        const checkUserQuery = 'SELECT * FROM tbantrian WHERE id_pemilik = ?';
 
         conn.query(checkUserQuery, [idChat], (err, results) => {
             if (err) {
@@ -165,7 +165,7 @@ function checkAntrian() {
 function checkUpdateAntrian() {
     return (ctx, next) => {
         const idChat = ctx.from.id;
-        const checkUserQuery = 'SELECT * FROM tbAntrian WHERE id_pemilik = ?';
+        const checkUserQuery = 'SELECT * FROM tbantrian WHERE id_pemilik = ?';
 
         conn.query(checkUserQuery, [idChat], (err, results) => {
             if (err) {
@@ -185,7 +185,7 @@ function checkUpdateAntrian() {
 function checkAdmin(requiredRole) {
     return (ctx, next) => {
         const idChat = ctx.from.id;
-        const roleQuery = 'SELECT kementerian FROM tbUser WHERE id_chat = ?';
+        const roleQuery = 'SELECT kementerian FROM tbuser WHERE id_chat = ?';
 
         conn.query(roleQuery, [idChat], (err, results) => {
             if (err) {
@@ -205,7 +205,7 @@ function checkAdmin(requiredRole) {
 function checkPetugas() {
     return (ctx, next) => {
         const idChat = ctx.from.id;
-        const roleQuery = 'SELECT kementerian FROM tbUser WHERE id_chat = ?';
+        const roleQuery = 'SELECT kementerian FROM tbuser WHERE id_chat = ?';
 
         conn.query(roleQuery, [idChat], (err, results) => {
             if (err) {
@@ -678,7 +678,7 @@ bot.command('daftar', async (ctx) => {
     const idChat = ctx.chat.id;
   
     // Query to check if user data exists
-    conn.query('SELECT * FROM tbUser WHERE id_chat = ?', [idChat], (err, results) => {
+    conn.query('SELECT * FROM tbuser WHERE id_chat = ?', [idChat], (err, results) => {
         if (err) {
             console.error(err);
             return ctx.reply('Terjadi kesalahan, coba lagi nanti. Silahkan laporkan kepada /contact_person jika perlu');
@@ -698,7 +698,7 @@ bot.command('edit_profil', checkUser(), async (ctx) => {
     const idChat = ctx.chat.id;
   
     // Query to check if user data exists
-    conn.query('SELECT * FROM tbUser WHERE id_chat = ?', [idChat], (err, results) => {
+    conn.query('SELECT * FROM tbuser WHERE id_chat = ?', [idChat], (err, results) => {
         if (err) {
             console.error(err);
             return ctx.reply('Terjadi kesalahan, coba lagi nanti. Silahkan laporkan kepada /contact_person jika perlu');
@@ -750,7 +750,7 @@ bot.command('ubah_jadwal', checkUser(), checkAntrian(), (ctx) => {
             return ctx.reply('Mohon maaf jadwal tidak tersedia🙏');
         }
 
-        // Generate buttons for available tbJadwal
+        // Generate buttons for available tbjadwal
         const btn_ubah = results.map((jadwals) => {
             // const { id, tanggal, kode_waktu, slots } = jadwals;
             const tanggalString = jadwals.tanggal.toISOString().split('T')[0]; // Format: YYYY-MM-DD
@@ -786,7 +786,7 @@ bot.action(/ubahjadwal_(.+)/, (ctx) => {
             return ctx.reply('Terjadi kesalahan saat cek jam pengambilan. Silahkan laporkan kepada /contact_person jika perlu');
         }
 
-        // Generate buttons for available tbJadwal
+        // Generate buttons for available tbjadwal
         const buttons = results.map((jadwals2) => {
             const { id, tanggal, rentang_waktu, slots } = jadwals2;
             const tanggalString = jadwals2.tanggal.toISOString().split('T')[0]; // Format: YYYY-MM-DD
@@ -838,14 +838,14 @@ bot.action(/ubahantri_(.+)/, (ctx) => {
 
         const jumlahPaket = dataStoreUbahJadwal[0].jml_paket
 
-        conn.query('DELETE FROM tbAntrian WHERE id_pemilik = ?', [userId], (err) => {
+        conn.query('DELETE FROM tbantrian WHERE id_pemilik = ?', [userId], (err) => {
             if (err) {
             console.error(err);
             return ctx.reply('Terjadi kesalahan saat mengubah Jadwal Pengambilan. Silahkan laporkan kepada /contact_person jika perlu');
             }
 
             // Add booking
-            const insertBookingQuery = 'INSERT INTO tbAntrian (id, id_pemilik, id_jadwal, jumlah_paket) VALUES (NULL, ?, ?, ?)';
+            const insertBookingQuery = 'INSERT INTO tbantrian (id, id_pemilik, id_jadwal, jumlah_paket) VALUES (NULL, ?, ?, ?)';
             conn.query(insertBookingQuery, [userId, getIdJadwal, jumlahPaket], (err) => {
                 if (err) {
                 console.error(err);
@@ -855,7 +855,7 @@ bot.action(/ubahantri_(.+)/, (ctx) => {
                 // console.log('Insert Query Parameters:', { userId, getIdJadwal, jumlahPaket });
     
                 // Update booked slots
-                const updateScheduleQuery = 'UPDATE tbJadwal SET slots = slots - ? WHERE id = ?';
+                const updateScheduleQuery = 'UPDATE tbjadwal SET slots = slots - ? WHERE id = ?';
                 conn.query(updateScheduleQuery, [jumlahPaket, getIdJadwal], (err) => {
                     if (err) {
                         console.error(err);
@@ -896,7 +896,7 @@ bot.command('pilih_jadwal', checkUser(), checkPaket(), checkUpdateAntrian(), (ct
             return ctx.reply('Mohon maaf jadwal tidak tersedia🙏');
         }
 
-        // Generate buttons for available tbJadwal
+        // Generate buttons for available tbjadwal
         const btn_pilih = results.map((jadwal) => {
             // const { id, tanggal, kode_waktu, slots } = jadwal;
             const tanggalString = jadwal.tanggal.toISOString().split('T')[0]; // Format: YYYY-MM-DD
@@ -932,7 +932,7 @@ bot.action(/jadwal_(.+)/, (ctx) => {
             return ctx.reply('Terjadi kesalahan saat cek jam pengambilan. Silahkan laporkan kepada /contact_person jika perlu');
         }
 
-        // Generate buttons for available tbJadwal
+        // Generate buttons for available tbjadwal
         const buttons = results.map((jadwal2) => {
             const { id, tanggal, rentang_waktu, slots } = jadwal2;
             const tanggalString = jadwal2.tanggal.toISOString().split('T')[0]; // Format: YYYY-MM-DD
@@ -986,7 +986,7 @@ bot.action(/antri_(.+)/, (ctx) => {
         const jumlahPaket = dataStoreJadwal[0].jml_paket
 
         // Add booking
-        const insertBookingQuery = 'INSERT INTO tbAntrian (id, id_pemilik, id_jadwal, jumlah_paket) VALUES (NULL, ?, ?, ?)';
+        const insertBookingQuery = 'INSERT INTO tbantrian (id, id_pemilik, id_jadwal, jumlah_paket) VALUES (NULL, ?, ?, ?)';
         conn.query(insertBookingQuery, [userId, getIdJadwal, jumlahPaket], (err) => {
             if (err) {
             console.error(err);
@@ -996,7 +996,7 @@ bot.action(/antri_(.+)/, (ctx) => {
             // console.log('Insert Query Parameters:', { userId, getIdJadwal, jumlahPaket });
 
             // Update booked slots
-            const updateScheduleQuery = 'UPDATE tbJadwal SET slots = slots - ? WHERE id = ?';
+            const updateScheduleQuery = 'UPDATE tbjadwal SET slots = slots - ? WHERE id = ?';
             conn.query(updateScheduleQuery, [jumlahPaket, getIdJadwal], (err) => {
                 if (err) {
                     console.error(err);
@@ -1106,7 +1106,7 @@ bot.on('text', (ctx) => {
         if (step === 'password_admin') {
             // Check username
             conn.query(
-                'SELECT * FROM tbKementerian WHERE role = "admin" AND password = ?', [text], (err, result) => {
+                'SELECT * FROM tbkementerian WHERE role = "admin" AND password = ?', [text], (err, result) => {
                     if (err) {
                         console.error(err);
                         return ctx.reply('Terjadi kesalahan saat memasukkan password admin. Silahkan laporkan kepada /contact_person jika perlu');
@@ -1120,7 +1120,7 @@ bot.on('text', (ctx) => {
                         nameAdmin = result[0].role
 
                         conn.query(
-                            'UPDATE tbUser SET kementerian = ? WHERE id_chat = ?',
+                            'UPDATE tbuser SET kementerian = ? WHERE id_chat = ?',
                             [nameAdmin, idChat],
                             (err) => {
                                 if (err) {
@@ -1141,7 +1141,7 @@ bot.on('text', (ctx) => {
         } else if (step === 'username_petugas') {
             // Check username
             conn.query(
-                'SELECT role FROM tbKementerian WHERE role = ?', [text], (err, result) => {
+                'SELECT role FROM tbkementerian WHERE role = ?', [text], (err, result) => {
                     if (err) {
                         console.error(err);
                         return ctx.reply('Terjadi kesalahan saat memasukkan username. Silahkan laporkan kepada /contact_person jika perlu');
@@ -1163,7 +1163,7 @@ bot.on('text', (ctx) => {
             // console.log(step)
             // input password
             conn.query(
-                'SELECT * FROM tbKementerian WHERE password = ?', [text], (err, result) => {
+                'SELECT * FROM tbkementerian WHERE password = ?', [text], (err, result) => {
                     if (err) {
                         console.error(err);
                         return ctx.reply('Terjadi kesalahan saat memasukkan username. Silahkan laporkan kepada /contact_person jika perlu');
@@ -1171,7 +1171,7 @@ bot.on('text', (ctx) => {
 
                     if (result.length > 0) {
                         // Data is exists
-                        conn.query("SELECT role FROM tbKementerian WHERE password = ?", [text], function (err, result, fields){
+                        conn.query("SELECT role FROM tbkementerian WHERE password = ?", [text], function (err, result, fields){
                             if(err){
                                 throw err
                             }
@@ -1187,7 +1187,7 @@ bot.on('text', (ctx) => {
                             // console.log(namaKementerian)
 
                             conn.query(
-                                'UPDATE tbUser SET kementerian = ? WHERE id_chat = ?',
+                                'UPDATE tbuser SET kementerian = ? WHERE id_chat = ?',
                                 [namaKementerian, idChat],
                                 (err) => {
                                     if (err) {
@@ -1214,7 +1214,7 @@ bot.on('text', (ctx) => {
         } else if (step === 'nama') {
             // Insert user's name
             conn.query(
-                'INSERT INTO tbUser (id, username, first_name, atas_nama, asrama, id_chat, kementerian) VALUES (NULL, ?, ?, ?, "", ?, "")',
+                'INSERT INTO tbuser (id, username, first_name, atas_nama, asrama, id_chat, kementerian) VALUES (NULL, ?, ?, ?, "", ?, "")',
                 [userName, firstName, text, idChat],
                 (err) => {
                     if (err) {
@@ -1229,7 +1229,7 @@ bot.on('text', (ctx) => {
         } else if (step === 'asrama') {
             // Update user's address
             conn.query(
-                'UPDATE tbUser SET asrama = ? WHERE id_chat = ?',
+                'UPDATE tbuser SET asrama = ? WHERE id_chat = ?',
                 [text, idChat],
                 (err) => {
                     if (err) {
@@ -1243,7 +1243,7 @@ bot.on('text', (ctx) => {
         } else if (step === 'nama_masuk') {
         // Save atas_nama and ask for asrama
             conn.query(
-                'INSERT INTO tbTempPaket (id_temp, atas_nama, asrama, kode_unik, id_chat) VALUES (NULL, ?, "", "", ?)',
+                'INSERT INTO tbtemppaket (id_temp, atas_nama, asrama, kode_unik, id_chat) VALUES (NULL, ?, "", "", ?)',
                 [text, idChat],
                 (err) => {
                 if (err) {
@@ -1260,7 +1260,7 @@ bot.on('text', (ctx) => {
             const kodeUnik = kodeRandom(6)
 
             conn.query(
-                'UPDATE tbTempPaket SET asrama = ?, kode_unik = ? WHERE id_chat = ?',
+                'UPDATE tbtemppaket SET asrama = ?, kode_unik = ? WHERE id_chat = ?',
                 [text, kodeUnik, idChat],
                 (err) => {
                 if (err) {
@@ -1272,7 +1272,7 @@ bot.on('text', (ctx) => {
                 }
             );
 
-            conn.query("SELECT tbUser.id_chat AS id_pemilik FROM tbUser WHERE atas_nama IN (SELECT atas_nama FROM tbTempPaket WHERE id_chat = ?) AND asrama IN (SELECT asrama FROM tbTempPaket WHERE id_chat = ?)", [idChat, idChat], function (err, result, fields){
+            conn.query("SELECT tbuser.id_chat AS id_pemilik FROM tbuser WHERE atas_nama IN (SELECT atas_nama FROM tbtemppaket WHERE id_chat = ?) AND asrama IN (SELECT asrama FROM tbtemppaket WHERE id_chat = ?)", [idChat, idChat], function (err, result, fields){
                 if(err){
                     throw err
                 }
@@ -1307,14 +1307,14 @@ Sekarang sekre ada jadwal pengambilan. Apakah kamu ingin pilih jadwal sekarang a
                 })
             })
 
-            // conn.query("SELECT COUNT(id_pemilik) AS jml_paket FROM tbpaket WHERE id_pemilik = (SELECT tbUser.id_chat FROM tbUser WHERE atas_nama IN (SELECT atas_nama FROM tbTempPaket WHERE id_chat = ?) AND asrama IN (SELECT asrama FROM tbTempPaket WHERE id_chat = ?)))", [idChat, idChat], function (err, result, fields){
+            // conn.query("SELECT COUNT(id_pemilik) AS jml_paket FROM tbpaket WHERE id_pemilik = (SELECT tbuser.id_chat FROM tbuser WHERE atas_nama IN (SELECT atas_nama FROM tbtemppaket WHERE id_chat = ?) AND asrama IN (SELECT asrama FROM tbtemppaket WHERE id_chat = ?)))", [idChat, idChat], function (err, result, fields){
             //     if(err){
             //         throw err
             //     }
             // })
 
             conn.query(
-                'DELETE FROM tbTempPaket WHERE id_chat = ?',
+                'DELETE FROM tbtemppaket WHERE id_chat = ?',
                 [idChat],
                 (err) => {
                 if (err) {
@@ -1328,7 +1328,7 @@ Sekarang sekre ada jadwal pengambilan. Apakah kamu ingin pilih jadwal sekarang a
         } else if (step === 'kode_unik') {
             // Insert user's name
             conn.query(
-                'INSERT INTO tbPaketKeluar (id_keluar, id_pemilik, kode_unik, id_petugas, timestamp) VALUES (NULL, "", ?, ?, "")',
+                'INSERT INTO tbpaketkeluar (id_keluar, id_pemilik, kode_unik, id_petugas, timestamp) VALUES (NULL, "", ?, ?, "")',
                 [text, idChat],
                 (err) => {
                     if (err) {
@@ -1339,7 +1339,7 @@ Sekarang sekre ada jadwal pengambilan. Apakah kamu ingin pilih jadwal sekarang a
             );
 
             conn.query(
-                'UPDATE tbPaketKeluar SET id_pemilik = (SELECT id_pemilik FROM tbPaket WHERE kode_unik=?), timestamp = current_timestamp() WHERE kode_unik = ?',
+                'UPDATE tbpaketkeluar SET id_pemilik = (SELECT id_pemilik FROM tbpaket WHERE kode_unik=?), timestamp = current_timestamp() WHERE kode_unik = ?',
                 [text, text],
                 (err) => {
                 if (err) {
@@ -1391,7 +1391,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                     bot.telegram.sendMessage(idPemilikPaket, notifKeluar)
 
                     conn.query(
-                        'DELETE FROM tbAntrian WHERE id_pemilik = ?',
+                        'DELETE FROM tbantrian WHERE id_pemilik = ?',
                         [idPemilikPaket],
                         (err) => {
                         if (err) {
@@ -1405,7 +1405,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
             })
             
             conn.query(
-                'DELETE FROM tbPaket WHERE kode_unik = ?',
+                'DELETE FROM tbpaket WHERE kode_unik = ?',
                 [text],
                 (err) => {
                 if (err) {
@@ -1431,7 +1431,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                 } else {
                     // Data does not exist, insert it
                     conn.query(
-                        'INSERT INTO tbJadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 1, ?)',
+                        'INSERT INTO tbjadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 1, ?)',
                         [text, slotsJadwal],
                         (err) => {
                             if (err) {
@@ -1441,7 +1441,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                         }
                     );
                     conn.query(
-                        'INSERT INTO tbJadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 2, ?)',
+                        'INSERT INTO tbjadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 2, ?)',
                         [text, slotsJadwal],
                         (err) => {
                             if (err) {
@@ -1451,7 +1451,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                         }
                     );
                     conn.query(
-                        'INSERT INTO tbJadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 3, ?)',
+                        'INSERT INTO tbjadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 3, ?)',
                         [text, slotsJadwal],
                         (err) => {
                             if (err) {
@@ -1461,7 +1461,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                         }
                     );
                     conn.query(
-                        'INSERT INTO tbJadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 4, ?)',
+                        'INSERT INTO tbjadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 4, ?)',
                         [text, slotsJadwal],
                         (err) => {
                             if (err) {
@@ -1471,7 +1471,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                         }
                     );
                     conn.query(
-                        'INSERT INTO tbJadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 5, ?)',
+                        'INSERT INTO tbjadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 5, ?)',
                         [text, slotsJadwal],
                         (err) => {
                             if (err) {
@@ -1481,7 +1481,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
                         }
                     );
                     conn.query(
-                        'INSERT INTO tbJadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 6, ?)',
+                        'INSERT INTO tbjadwal (id, tanggal, kode_waktu, slots) VALUES (NULL, ?, 6, ?)',
                         [text, slotsJadwal],
                         (err) => {
                             if (err) {
@@ -1498,7 +1498,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
         } else if (step === 'edit_profil_nama') {
             // Insert user's name
             conn.query(
-                'UPDATE tbUser SET atas_nama = ? WHERE id_chat = ?',
+                'UPDATE tbuser SET atas_nama = ? WHERE id_chat = ?',
                 [text, idChat],
                 (err) => {
                     if (err) {
@@ -1513,7 +1513,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
         } else if (step === 'edit_profil_asrama') {
             // Update user's address
             conn.query(
-                'UPDATE tbUser SET asrama = ? WHERE id_chat = ?',
+                'UPDATE tbuser SET asrama = ? WHERE id_chat = ?',
                 [text, idChat],
                 (err) => {
                     if (err) {
@@ -1534,7 +1534,7 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
 });
 
 bot.telegram.setWebhook(domain);
-bot.startWebhook('/', null, 3000);
+bot.startWebhook('/', null, port);
 
 bot.launch(
     // {
