@@ -36,7 +36,7 @@ function DBConn(){
         if (err) throw err
         console.log("DB Connected!")
     })
-    conn.query("SELECT * FROM tbUser", function (err, result, fields){
+    conn.query("SELECT * FROM tbuser", function (err, result, fields){
         if(err){
             throw err
         }
@@ -1533,16 +1533,19 @@ sudah diambil dari sekre. Jika terdapat kekeliruan, silahkan hubungi /contact_pe
     }
 });
 
+bot.telegram.setWebhook(domain);
+bot.startWebhook('/', null, 3000);
+
 bot.launch(
-    {
-        webhook: {
-            // Public domain for webhook; e.g.: example.com
-            domain: domain,
+    // {
+    //     webhook: {
+    //         // Public domain for webhook; e.g.: example.com
+    //         domain: domain,
         
-            // Port to listen on; e.g.: 8080
-            port: port,
-        },
-    }
+    //         // Port to listen on; e.g.: 8080
+    //         port: port,
+    //     },
+    // }
 )
 
 // Graceful shutdown
